@@ -96,6 +96,36 @@ function userController() {
         async () => await prisma.$disconnect();
       }
     },
+    updateUser: async (req, res) => {
+      try {
+        // check valid data
+        let data = req.body; // get data from body
+        let uid = parseInt(req.params.uid); // get user id from params
+        if (!data.full_name) {
+          return res
+            .status(400)
+            .json({ ok: false, msg: "Please enter required field" });
+        }
+        // check if user existd
+        const user = await prisma.user.findUnique({ where: { user_id: uid } });
+        if (!user) {
+          return res.status(404).json({ ok: false, msg: "User not found" });
+        }
+        const result = await prisma.user.update({
+          where: { user_id: uid },
+          data: { full_name: data.full_name },
+        });
+        return res.json({ ok: true, msg: "Update successful", data: result });
+      } catch (error) {
+        res.status(500).json({
+          ok: false,
+          error: "Something went wrong!",
+        });
+        console.log(error);
+      } finally {
+        async () => await prisma.$disconnect();
+      }
+    },
   };
 }
 
