@@ -1,10 +1,23 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt"); // encrypt password
 
 const resJSON = require("../constants/responseJSON");
 
 const prisma = new PrismaClient();
 
 function userController() {
+  const SELF = {
+    enCodePass: (password) => {
+      return bcrypt
+        .hash(password, 10) // change encode password - 10 : salt
+        .then((hash) => {
+          return Promise.resolve(hash);
+        })
+        .catch((err) => {
+          Logger.error(`encrypt password fail: ${err}`);
+        });
+    },
+  };
   return {
     login: async (req, res) => {
       try {
@@ -59,17 +72,19 @@ function userController() {
             .status(400)
             .json(resJSON(false, 400, "Username already in use", null));
         }
-        const result = await prisma.user.create({
-          data: {
-            username: data.username,
-            password: data.password,
-            full_name: data.full_name,
-            score: 0,
-          },
+        SELF.enCodePass(data.password).then(async (hash) => {
+          const result = await prisma.user.create({
+            data: {
+              username: data.username,
+              password: hash,
+              full_name: data.full_name,
+              score: 0,
+            },
+          });
+          return res
+            .status(200)
+            .json(resJSON(true, 200, "Register successfull", result));
         });
-        return res
-          .status(200)
-          .json(resJSON(true, 200, "Register successfull", result));
       } catch (error) {
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
       } finally {
