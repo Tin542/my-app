@@ -16,4 +16,6 @@ model User {
   username  String @unique
   password  String
   score     Int
+  create_date DateTime
+  update_date DateTime
 }
