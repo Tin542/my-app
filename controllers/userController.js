@@ -38,15 +38,15 @@ function userController() {
             .json(resJSON(false, 404, "Account not found", null));
         }
         // check login
-        const result = await prisma.user.findUnique({
-          where: { username: data.username, password: data.password },
-        });
+        const result = bcrypt.compare(data?.password.trim(), user.password);
         if (!result) {
-          return res.status(200).json({ ok: true, msg: "Wrong password" });
+          return res
+            .status(404)
+            .json(resJSON(false, 404, "Wrong password", null));
         } else {
           return res
             .status(200)
-            .json(resJSON(true, 200, "Login success", result));
+            .json(resJSON(true, 200, "Login success", user));
         }
       } catch (error) {
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
@@ -176,11 +176,17 @@ function userController() {
         let uid = parseInt(req.params.uid);
 
         // Check valid data
-        if(parseInt(data.action) < 1 || parseInt(data.action) > 2){
-          return res.status(400).json(resJSON(false, 400, "Action must be 1(plus) or 2(minus)", null));
+        if (parseInt(data.action) < 1 || parseInt(data.action) > 2) {
+          return res
+            .status(400)
+            .json(
+              resJSON(false, 400, "Action must be 1(plus) or 2(minus)", null)
+            );
         }
-        if(parseInt(data.score) < 0) {
-          return res.status(400).json(resJSON(false, 400, "score must be a positive number", null));
+        if (parseInt(data.score) < 0) {
+          return res
+            .status(400)
+            .json(resJSON(false, 400, "score must be a positive number", null));
         }
         // check if user already exists
         const user = await prisma.user.findUnique({
