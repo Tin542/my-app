@@ -18,4 +18,24 @@ model User {
   score     Int
   create_date DateTime
   update_date DateTime
+  role User_Role[]
+}
+
+model Role {
+  role_id Int @id @default(autoincrement())
+  role_name String
+  create_date DateTime
+  update_date DateTime
+  user User_Role[]
+}
+
+model User_Role {
+  user User @relation(fields: [uid], references: [user_id])
+  uid Int
+  role Role@relation(fields: [rid], references: [role_id])
+  rid Int
+  create_date DateTime
+  update_date DateTime
+
+  @@id([uid, rid])
 }

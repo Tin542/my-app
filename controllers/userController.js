@@ -81,6 +81,19 @@ function userController() {
               score: 0,
               create_date: new Date(),
               update_date: new Date(),
+              role: {
+                create: [
+                  {
+                    create_date: new Date(),
+                    update_date: new Date(),
+                    role: {
+                      connect: {
+                        role_id: 1,
+                      },
+                    },
+                  },
+                ],
+              },
             },
           });
           return res
