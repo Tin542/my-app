@@ -30,7 +30,10 @@ function authController() {
         }
         // check if user existed
         const user = await prisma.user.findUnique({
-          where: { username: data.username },
+          include: { role: true },
+          where: {
+            username: data.username,
+          },
         });
         if (!user) {
           return res
@@ -41,14 +44,16 @@ function authController() {
         const result = bcrypt.compare(data?.password.trim(), user.password);
         if (!result) {
           return res
-            .status(404)
-            .json(resJSON(false, 404, "Wrong password", null));
+            .status(401)
+            .json(resJSON(false, 401, "Wrong password", null));
         } else {
+          
           return res
             .status(200)
             .json(resJSON(true, 200, "Login success", user));
         }
       } catch (error) {
+        console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
       } finally {
         async () => await prisma.$disconnect();
