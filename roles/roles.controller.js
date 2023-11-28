@@ -34,6 +34,17 @@ function roleController() {
         async () => await prisma.$disconnect();
       }
     },
+    getAll: async (req, res) => {
+      try {
+        const result = await prisma.role.findMany();
+        return res.status(200).json(resJSON(true, 200, "Role founded successfully", result));
+      } catch (error) {
+        console.log(error);
+        res.status(500).json(resJSON(false, 500, "Something went wrong", null));
+      } finally {
+        async () => await prisma.$disconnect();
+      }
+    },
   };
 }
 module.exports = new roleController();
