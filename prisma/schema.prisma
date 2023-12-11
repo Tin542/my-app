@@ -18,6 +18,7 @@ model User {
   score     Int
   create_date DateTime
   update_date DateTime
+  refresh_token String ?
   role User_Role[]
 }
 
