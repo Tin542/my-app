@@ -23,7 +23,7 @@ model User {
 }
 
 model Role {
-  role_id Int @id @default(autoincrement())
+  role_id Int @id 
   role_name String
   create_date DateTime
   update_date DateTime

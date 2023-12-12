@@ -5,5 +5,6 @@ const roleController = require('./roles.controller');
 
 router.post('/create', roleController.add);
 router.get('/all', roleController.getAll);
+router.delete('/delete/:id', roleController.delete);
 
 module.exports = router;
