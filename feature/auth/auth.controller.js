@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt"); // encrypt password
+const jwt = require("jsonwebtoken");
 
 const resJSON = require("../../constants/responseJSON");
 
@@ -47,7 +48,18 @@ function authController() {
             .status(401)
             .json(resJSON(false, 401, "Wrong password", null));
         } else {
-          
+          const token = jwt.sign(
+            {
+              uid: user.user_id,
+              rid: user.role[0].rid,
+            },
+            process.env.ACCESS_TOKEN_SECRET,
+            {
+              expiresIn: process.env.ACCESS_TOKEN_LIFE,
+            }
+          );
+          user.access_token = token;
+          res.header('auth-token', token).send(token);
           return res
             .status(200)
             .json(resJSON(true, 200, "Login success", user));
@@ -62,6 +74,19 @@ function authController() {
     register: async (req, res) => {
       try {
         let data = req.body;
+        let rid = req.body.rid;
+        if (!rid) {
+          rid = 2; // Defaul User role
+        } else {
+          const resultRole = await prisma.role.findUnique({
+            where: { role_id: parseInt(rid) },
+          });
+          if (!resultRole) {
+            return res
+              .status(404)
+              .json(resJSON(false, 404, "Role not found", null));
+          }
+        }
         // check data validation
         if (!data.username || !data.password || !data.full_name) {
           return res
@@ -93,7 +118,7 @@ function authController() {
                     update_date: new Date(),
                     role: {
                       connect: {
-                        role_id: 1,
+                        role_id: parseInt(rid),
                       },
                     },
                   },

@@ -6,7 +6,6 @@ const resJSON = require("../../constants/responseJSON");
 const prisma = new PrismaClient();
 
 function userController() {
-  
   return {
     getAllUser: async (req, res) => {
       try {
@@ -72,6 +71,14 @@ function userController() {
           return res
             .status(404)
             .json(resJSON(false, 404, "User not found", null));
+        }
+        const deleteRef = await prisma.user_Role.deleteMany({
+          where: { uid: uid },
+        });
+        if (!deleteRef) {
+          return res
+            .status(500)
+            .json(resJSON(false, 500, "Something went wrong", null));
         }
         const result = await prisma.user.delete({ where: { user_id: uid } });
         return res
