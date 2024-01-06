@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 
-const resJSON = require("../../constants/responseJSON");
+const resJSON = require("../../../constants/responseJSON");
 
 const prisma = new PrismaClient();
 

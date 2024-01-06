@@ -1,10 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 
-const userRouter = require('./feature/users/users.routes');
-const roleRouter = require('./feature/roles/roles.routes');
 const authRouter = require('./feature/auth/auth.routes');
-
+const adminRouter = require('./feature/admin/admin.routes');
 const app = express();
 
 app.use(cors());
@@ -15,8 +13,7 @@ app.get('/', (req, res) => {
     res.json({ "message": "hello world" });
 });
 app.use("/auth", authRouter);
-app.use("/user", userRouter);
-app.use("/role", roleRouter);
+app.use("/admin", adminRouter);
 
 const port = process.env.PORT;
 app.listen(port, () => {
