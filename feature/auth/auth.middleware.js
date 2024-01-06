@@ -1,16 +1,33 @@
-const jwt = require('jsonwebtoken');
+const { PrismaClient } = require("@prisma/client");
 
-module.exports = (request, response, next) => {
-    const token = request.header('auth-token');
+const authMethod = require("./auth.method");
+const prisma = new PrismaClient();
 
-    
-    if (!token) return response.status(401).send('Access Denied');
+exports.isAdmin = async (req, res, next) => {
+  // Lấy access token từ header
+  const accessTokenFromHeader = req.headers.x_token;
+  if (!accessTokenFromHeader) {
+    return res.status(401).send("access token not found");
+  }
 
-    try {
-        const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        console.log('Verified token'. verified);
-        next();
-    } catch (err) {
-        return response.status(400).send('Invalid Token');
-    }
+  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+
+  const verified = await authMethod.verifyToken(
+    accessTokenFromHeader,
+    accessTokenSecret
+  );
+  if (!verified) {
+    return res.status(401).send("Access token not verified");
+  }
+
+  if (verified.payload.rid !== 1) {
+    return res.status(403).send("Access Deniend");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { user_id: verified.payload.uid },
+  });
+  req.user = user;
+
+  return next();
 };

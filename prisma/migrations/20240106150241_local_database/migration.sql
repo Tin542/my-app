@@ -3,8 +3,24 @@ BEGIN TRY
 BEGIN TRAN;
 
 -- CreateTable
+CREATE TABLE [dbo].[User] (
+    [user_id] INT NOT NULL IDENTITY(1,1),
+    [full_name] NVARCHAR(1000) NOT NULL,
+    [username] NVARCHAR(1000) NOT NULL,
+    [password] NVARCHAR(1000) NOT NULL,
+    [score] INT NOT NULL,
+    [create_date] DATETIME2 NOT NULL,
+    [update_date] DATETIME2 NOT NULL,
+    [refresh_token] NVARCHAR(1000),
+    [isActived] BIT,
+    [isDeleted] BIT,
+    CONSTRAINT [User_pkey] PRIMARY KEY CLUSTERED ([user_id]),
+    CONSTRAINT [User_username_key] UNIQUE NONCLUSTERED ([username])
+);
+
+-- CreateTable
 CREATE TABLE [dbo].[Role] (
-    [role_id] INT NOT NULL IDENTITY(1,1),
+    [role_id] INT NOT NULL,
     [role_name] NVARCHAR(1000) NOT NULL,
     [create_date] DATETIME2 NOT NULL,
     [update_date] DATETIME2 NOT NULL,
