@@ -19,6 +19,8 @@ model User {
   create_date DateTime
   update_date DateTime
   refresh_token String ?
+  isActived Boolean ?
+  isDeleted Boolean ?
   role User_Role[]
 }
 
