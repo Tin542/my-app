@@ -38,7 +38,7 @@ exports.isAdmin = async (req, res, next) => {
 };
 exports.isManager = async (req, res, next) => {
   // Lấy access token từ header
-  const accessTokenFromHeader = req.headers.x_token;
+  const accessTokenFromHeader = req.header('Authorization').replace('Bearer ', '');
   if (!accessTokenFromHeader) {
     return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
   }
@@ -68,7 +68,7 @@ exports.isManager = async (req, res, next) => {
 };
 exports.isStaff = async (req, res, next) => {
   // Lấy access token từ header
-  const accessTokenFromHeader = req.headers.x_token;
+  const accessTokenFromHeader = req.header('Authorization').replace('Bearer ', '');
   if (!accessTokenFromHeader) {
     return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
   }
