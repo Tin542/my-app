@@ -14,8 +14,9 @@ router.delete("/role/delete/:id", isAdmin, roleController.delete);
 router.put("/role/update/:id", isAdmin, roleController.update);
 
 // Management User
-router.get('/user/all', userController.getAllUser);
-router.put('/user/update/:uid', userController.updateUser);
-router.delete('/user/delete/:uid', userController.deleteUser);
+router.get('/user/all', isAdmin, userController.getAllUser);
+router.put('/user/update/:uid', isAdmin, userController.updateUser);
+router.delete('/user/delete/:uid',isAdmin, userController.deleteUser);
+router.post('/user/create', isAdmin, userController.createUser);
 
 module.exports = router;

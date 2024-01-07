@@ -2,11 +2,76 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt"); // encrypt password
 
 const resJSON = require("../../../constants/responseJSON");
+const enCryptPassword = require("../../../utils/encryptPassword");
 
 const prisma = new PrismaClient();
 
 function userController() {
   return {
+    createUser: async (req, res) => {
+      try {
+        let dataCreate = req.body;
+        // check all required fields
+        if (
+          !dataCreate.fullName ||
+          !dataCreate.username ||
+          !dataCreate.password ||
+          !dataCreate.isActived ||
+          !dataCreate.rid
+        ) {
+          return res
+            .status(400)
+            .json(resJSON(false, 400, "Enter all required fields"));
+        }
+        // check if role exists
+        const checkRoleExists = await prisma.role.findUnique({
+          where: { role_id: parseInt(dataCreate.rid) },
+        });
+        if (!checkRoleExists) {
+          return res.status(400).json(resJSON(false, 400, "Invalid role"));
+        }
+        // check is username is alredy in use
+        const usernameExisted = await prisma.user.findUnique({where: {username: dataCreate.username}});
+        if(usernameExisted) {
+          return res.statsu(400).json(resJSON(false, 400, "Username already in use", null));
+        }
+        // insert user
+        enCryptPassword(dataCreate.password).then(async (hash) => {
+          const result = await prisma.user.create({
+            data: {
+              username: dataCreate.username,
+              password: hash,
+              full_name: dataCreate.fullName,
+              score: 0,
+              isActived: dataCreate.isActived,
+              isDeleted: false,
+              create_date: new Date(),
+              update_date: new Date(),
+              role: {
+                create: [
+                  {
+                    create_date: new Date(),
+                    update_date: new Date(),
+                    role: {
+                      connect: {
+                        role_id: parseInt(dataCreate.rid),
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          });
+          return res
+            .status(200)
+            .json(resJSON(true, 200, "Create user success", result));
+        });
+      } catch (error) {
+        res.status(500).json(resJSON(false, 500, "Something went wrong", null));
+      } finally {
+        async () => await prisma.$disconnect();
+      }
+    },
     getAllUser: async (req, res) => {
       try {
         const users = await prisma.user.findMany();
@@ -84,78 +149,6 @@ function userController() {
         return res
           .status(200)
           .json(resJSON(true, 200, "Delete successfully", result));
-      } catch (error) {
-        console.log(error);
-        res.status(500).json(resJSON(false, 500, "Something went wrong", null));
-      } finally {
-        async () => await prisma.$disconnect();
-      }
-    },
-    updateScore: async (req, res) => {
-      try {
-        //get data from body
-        let data = req.body;
-        let uid = parseInt(req.params.uid);
-
-        // Check valid data
-        if (parseInt(data.action) < 1 || parseInt(data.action) > 2) {
-          return res
-            .status(400)
-            .json(
-              resJSON(false, 400, "Action must be 1(plus) or 2(minus)", null)
-            );
-        }
-        if (parseInt(data.score) < 0) {
-          return res
-            .status(400)
-            .json(resJSON(false, 400, "score must be a positive number", null));
-        }
-        // check if user already exists
-        const user = await prisma.user.findUnique({
-          where: { user_id: uid },
-        });
-        if (!user) {
-          return res
-            .status(404)
-            .json(resJSON(false, 404, "User not found", null));
-        }
-        if (parseInt(data.action) === 1) {
-          const result = await prisma.user.update({
-            where: { user_id: uid },
-            data: {
-              score: parseInt(user.score) + parseInt(data.score),
-              update_date: new Date(),
-            },
-          });
-          return res
-            .status(200)
-            .json(
-              resJSON(
-                true,
-                200,
-                `You have been plus ${data.score} score`,
-                result
-              )
-            );
-        } else if (parseInt(data.action) === 2) {
-          const result = await prisma.user.update({
-            where: { user_id: uid },
-            data: {
-              score: parseInt(user.score) - parseInt(data.score),
-              update_date: new Date(),
-            },
-          });
-          return res
-            .status(200)
-            .json(
-              resJSON(
-                true,
-                200,
-                `You have been minus ${data.score} score`,
-                result
-              )
-            );
-        }
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
