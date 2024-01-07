@@ -8,6 +8,9 @@ const prisma = new PrismaClient();
 
 exports.isAdmin = async (req, res, next) => {
   // Lấy access token từ header
+  if(!req.header('Authorization')){
+    return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
+  }
   const accessTokenFromHeader = req.header('Authorization').replace('Bearer ', '');
   if (!accessTokenFromHeader) {
     return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
@@ -22,7 +25,7 @@ exports.isAdmin = async (req, res, next) => {
   if (!verified) {
     return res
       .status(401)
-      .json(resJSON(false, 401, "Access Token is not verified", null));
+      .json(resJSON(false, 401, "Access token is expried", null));
   }
 
   if (verified.payload.rid !== roleConstants.ROLE_ADMIN) {
@@ -38,6 +41,9 @@ exports.isAdmin = async (req, res, next) => {
 };
 exports.isManager = async (req, res, next) => {
   // Lấy access token từ header
+  if(!req.header('Authorization')){
+    return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
+  }
   const accessTokenFromHeader = req.header('Authorization').replace('Bearer ', '');
   if (!accessTokenFromHeader) {
     return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
@@ -52,7 +58,7 @@ exports.isManager = async (req, res, next) => {
   if (!verified) {
     return res
       .status(401)
-      .json(resJSON(false, 401, "Access Token is not verified", null));
+      .json(resJSON(false, 401, "Access token is expried", null));
   }
 
   if (verified.payload.rid !== roleConstants.ROLE_MANAGER) {
@@ -68,6 +74,9 @@ exports.isManager = async (req, res, next) => {
 };
 exports.isStaff = async (req, res, next) => {
   // Lấy access token từ header
+  if(!req.header('Authorization')){
+    return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
+  }
   const accessTokenFromHeader = req.header('Authorization').replace('Bearer ', '');
   if (!accessTokenFromHeader) {
     return res.status(401).json(resJSON(false, 401, "Unauthorized", null));
@@ -82,7 +91,7 @@ exports.isStaff = async (req, res, next) => {
   if (!verified) {
     return res
       .status(401)
-      .json(resJSON(false, 401, "Access Token is not verified", null));
+      .json(resJSON(false, 401, "Access token is expried", null));
   }
 
   if (verified.payload.rid !== roleConstants.ROLE_STAFF) {

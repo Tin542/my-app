@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 function userController() {
   return {
-    createUser: async (req, res) => {
+    createStaff: async (req, res) => {
       try {
         let dataCreate = req.body;
         // check all required fields
@@ -16,24 +16,20 @@ function userController() {
           !dataCreate.fullName ||
           !dataCreate.username ||
           !dataCreate.password ||
-          !dataCreate.isActived ||
-          !dataCreate.rid
+          !dataCreate.isActived
         ) {
           return res
             .status(400)
             .json(resJSON(false, 400, "Enter all required fields"));
         }
-        // check if role exists
-        const checkRoleExists = await prisma.role.findUnique({
-          where: { role_id: parseInt(dataCreate.rid) },
-        });
-        if (!checkRoleExists) {
-          return res.status(400).json(resJSON(false, 400, "Invalid role"));
-        }
         // check is username is alredy in use
-        const usernameExisted = await prisma.user.findUnique({where: {username: dataCreate.username}});
-        if(usernameExisted) {
-          return res.statsu(400).json(resJSON(false, 400, "Username already in use", null));
+        const usernameExisted = await prisma.user.findUnique({
+          where: { username: dataCreate.username },
+        });
+        if (usernameExisted) {
+          return res
+            .statsu(400)
+            .json(resJSON(false, 400, "Username already in use", null));
         }
         // insert user
         enCryptPassword(dataCreate.password).then(async (hash) => {
@@ -54,7 +50,7 @@ function userController() {
                     update_date: new Date(),
                     role: {
                       connect: {
-                        role_id: parseInt(dataCreate.rid),
+                        role_id: 3,
                       },
                     },
                   },
@@ -64,32 +60,39 @@ function userController() {
           });
           return res
             .status(200)
-            .json(resJSON(true, 200, "Create user success", result));
+            .json(resJSON(true, 200, "Create staff success", result));
         });
       } catch (error) {
+        console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
       } finally {
         async () => await prisma.$disconnect();
       }
     },
-    getAllUser: async (req, res) => {
+    getAllStaff: async (req, res) => {
       try {
         const users = await prisma.user.findMany({
           where: {
             isDeleted: false,
-          }
+            role: {
+              some: {
+                rid: 3,
+              },
+            },
+          },
         });
         if (users.length === 0) {
           return res.status(200).json(resJSON(true, 200, "No Records", null));
         }
-        return res.json(resJSON(true, 200, "User founded", users));
+        return res.json(resJSON(true, 200, "Staff founded", users));
       } catch (error) {
+        console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
       } finally {
         async () => await prisma.$disconnect();
       }
     },
-    updateUser: async (req, res) => {
+    updateStaff: async (req, res) => {
       try {
         // check valid data
         let data = req.body; // get data from body
@@ -131,7 +134,7 @@ function userController() {
         async () => await prisma.$disconnect();
       }
     },
-    deleteUser: async (req, res) => {
+    deleteStaff: async (req, res) => {
       try {
         let uid = parseInt(req.params.uid); // get user id
         // check if user already exists
