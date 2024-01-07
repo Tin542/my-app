@@ -12,7 +12,7 @@ function authController() {
     refreshToken: async (req, res) => {
       try {
         // Lấy access token từ header
-        const accessToken = req.headers.x_token;
+        const accessToken = req.header('Authorization').replace('Bearer ', '');
         if (!accessToken) {
           return res
             .status(404)
@@ -44,8 +44,8 @@ function authController() {
         }
         if (refreshToken != user.refresh_token) {
           return res
-            .status(400)
-            .json(resJSON(false, 400, "refreshToken invalid", null));
+            .status(403)
+            .json(resJSON(false, 403, "refreshToken invalid", null));
         }
         // Tạo access token mới
         const dataForAccessToken = {
@@ -60,9 +60,9 @@ function authController() {
         if (!accessTokenNew) {
           return res
             .status(400)
-            .json(resJSON(false, 400, "Tạo access token không thành công", null));
+            .json(resJSON(false, 400, "Fail to create new access token", null));
         }
-        return res.json(resJSON(true, 200, "Tạo access token thành công", accessTokenNew));
+        return res.json(resJSON(true, 200, "Create new access token success", accessTokenNew));
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
