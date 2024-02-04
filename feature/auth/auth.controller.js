@@ -1,18 +1,16 @@
-const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt"); // encrypt password
 const randToken = require("rand-token");
 
 const resJSON = require("../../constants/responseJSON");
 const authMethod = require("./auth.method");
-
-const prisma = new PrismaClient();
+const User = require("../../models/user").User;
 
 function authController() {
   return {
     refreshToken: async (req, res) => {
       try {
         // Lấy access token từ header
-        const accessToken = req.header('Authorization').replace('Bearer ', '');
+        const accessToken = req.header("Authorization").replace("Bearer ", "");
         if (!accessToken) {
           return res
             .status(404)
@@ -26,7 +24,10 @@ function authController() {
             .json(resJSON(false, 404, "refreshToken not found", null));
         }
         // Decode access token đó
-        const decoded = await authMethod.decodeToken(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        const decoded = await authMethod.decodeToken(
+          accessToken,
+          process.env.ACCESS_TOKEN_SECRET
+        );
         if (!decoded) {
           return res
             .status(400)
@@ -36,7 +37,9 @@ function authController() {
         const uid = decoded.payload.uid;
         const rid = decoded.payload.rid;
         // check User of token
-        const user = await prisma.user.findUnique({ where: { user_id: parseInt(uid) } });
+        const user = await User.findOne({
+          _id: uid,
+        }).lean();
         if (!user) {
           return res
             .status(404)
@@ -62,13 +65,13 @@ function authController() {
             .status(400)
             .json(resJSON(false, 400, "Fail to create new access token", null));
         }
-        return res.json(resJSON(true, 200, "Create new access token success", accessTokenNew));
+        return res.json(
+          resJSON(true, 200, "Create new access token success", accessTokenNew)
+        );
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
-      } finally {
-        async () => await prisma.$disconnect();
-      }
+      } 
     },
     login: async (req, res) => {
       try {
@@ -80,12 +83,9 @@ function authController() {
             .json(resJSON(false, 400, "Please enter required fields", null));
         }
         // check if user existed
-        const user = await prisma.user.findUnique({
-          include: { role: true },
-          where: {
-            username: data.username,
-          },
-        });
+        const user = await User.findOne({
+          username: data?.username.trim(),
+        }).lean();
         if (!user) {
           return res
             .status(404)
@@ -100,8 +100,8 @@ function authController() {
         } else {
           // create access token
           const dataForAccessToken = {
-            uid: user.user_id,
-            rid: user.role[0].rid,
+            uid: user._id, // store user id to access token
+            role: user.role,// store user role to access token
           };
           const accessToken = await authMethod.generateToken(
             dataForAccessToken,
@@ -117,16 +117,10 @@ function authController() {
           }
           // create refresh token
           let refreshToken = randToken.generate(21); // tạo 1 refresh token ngẫu nhiên
-          if (!user.refresh_token) {
+          if (!user.token) {
             // Nếu user này chưa có refresh token thì lưu refresh token đó vào database
-            await prisma.user.update({
-              where: { user_id: parseInt(user.user_id) },
-              data: {
-                refresh_token: refreshToken,
-                update_date: new Date(),
-              },
-            });
-            user.refresh_token = refreshToken;
+            await User.findByIdAndUpdate(user._id, { token: refreshToken })
+            user.token = refreshToken;
           } else {
             // Nếu user này đã có refresh token thì lấy refresh token đó từ database
             refreshToken = user.refresh_token;
@@ -138,8 +132,6 @@ function authController() {
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
-      } finally {
-        async () => await prisma.$disconnect();
       }
     },
     // register: async (req, res) => {

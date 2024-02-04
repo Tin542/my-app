@@ -1,4 +1,3 @@
-const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt"); // encrypt password
 
 const resJSON = require("../../../constants/responseJSON");
