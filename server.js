@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRouter = require('./feature/auth/auth.routes');
 const productsRouter = require('./feature/product/product.routes');
+const userRouter = require('./feature/user/user.routes');
 const app = express();
 
 const port = process.env.PORT;
@@ -20,8 +21,9 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.use("/auth", authRouter);
+// app.use("/auth", authRouter);
 app.use('/products', productsRouter);
+app.use('/user', userRouter);
 
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
