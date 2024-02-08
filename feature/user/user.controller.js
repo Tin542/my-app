@@ -82,6 +82,70 @@ function UserController() {
         console.log(error);
       }
     },
+    getDetail: async (req, res ) => {
+      try {
+        let userId = req.params?.id;
+        let result = await User.findById(userId);
+        if (!result) {
+          return res
+            .status(404)
+            .json(resJSON(false, 404, "User not found", null));
+        }
+        return res
+          .status(200)
+          .json(resJSON(true, 200, "User found", result));
+      } catch (error) {
+        console.log("Get Detail error: " + error);
+      }
+    },
+    editUser: async (req, res) => {
+      try {
+        let editData = req.body;
+        let detailUser = await User.findById(editData._id);
+        if (!detailUser) {
+          return res
+            .status(404)
+            .json(resJSON(false, 404, "User not found", null));
+        }
+        delete editData._id; // xoa field id trong editData
+        return await User.findByIdAndUpdate(detailUser._id, editData)
+          .then((rs) => {
+            if (rs) {
+              return res
+                .status(200)
+                .json(resJSON(true, 200, "User edited", rs));
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      } catch (error) {
+        console.log("edit user error: ", error);
+      }
+    },
+    deleteUser: async (req, res) => {
+      try {
+        const uId = req.params?.id;
+        const user = await User.findById(uId);
+        if (!user) {
+            return res
+            .status(404)
+            .json(resJSON(false, 404, "user not found", null));
+        }
+        User.deleteOne({ _id: uId })
+          .then((rs) => {
+            return res
+            .status(200)
+            .json(resJSON(true, 200, "user deleted", rs));
+          })
+          .catch((e) => {
+            console.log(`deleteuser - fail: ${e}`);
+            return rs.json({ s: 400, msg: "deleteuserfail" });
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 }
 module.exports = new UserController();
