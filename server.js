@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 require('dotenv').config();
 
 const authRouter = require('./feature/auth/auth.routes');
-const adminRouter = require('./feature/admin/admin.routes');
+const productsRouter = require('./feature/product/product.routes');
 const app = express();
 
 const port = process.env.PORT;
@@ -21,8 +21,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use("/auth", authRouter);
-app.use("/admin", adminRouter);
-
+app.use('/products', productsRouter);
 
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
