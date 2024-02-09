@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt"); // encrypt password
 const randToken = require("rand-token");
 
 const resJSON = require("../../constants/responseJSON");
+const enCryptPassword = require("../../utils/encryptPassword");
 const authMethod = require("./auth.method");
 const User = require("../../models/user.model").User;
 
@@ -45,7 +46,7 @@ function authController() {
             .status(404)
             .json(resJSON(false, 400, "user not found", null));
         }
-        if (refreshToken != user.token) {
+        if (refreshToken != user.refresh_token) {
           return res
             .status(403)
             .json(resJSON(false, 403, "refreshToken invalid", null));
@@ -71,7 +72,7 @@ function authController() {
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
-      } 
+      }
     },
     login: async (req, res) => {
       try {
@@ -101,7 +102,7 @@ function authController() {
           // create access token
           const dataForAccessToken = {
             uid: user._id, // store user id to access token
-            role: user.role,// store user role to access token
+            role: user.role, // store user role to access token
           };
           const accessToken = await authMethod.generateToken(
             dataForAccessToken,
@@ -117,13 +118,15 @@ function authController() {
           }
           // create refresh token
           let refreshToken = randToken.generate(21); // tạo 1 refresh token ngẫu nhiên
-          if (!user.token) {
+          if (!user.refresh_token) {
             // Nếu user này chưa có refresh token thì lưu refresh token đó vào database
-            await User.findByIdAndUpdate(user._id, { token: refreshToken })
-            user.token = refreshToken;
+            await User.findByIdAndUpdate(user._id, {
+              refresh_token: refreshToken,
+            });
+            user.refresh_token = refreshToken;
           } else {
             // Nếu user này đã có refresh token thì lấy refresh token đó từ database
-            refreshToken = user.token;
+            refreshToken = user.refresh_token;
           }
           return res
             .status(200)
@@ -132,6 +135,53 @@ function authController() {
       } catch (error) {
         console.log(error);
         res.status(500).json(resJSON(false, 500, "Something went wrong", null));
+      }
+    },
+    register: async (req, res) => {
+      try {
+        let data = req.body; // data register
+        // check validate
+        if (
+          !data?.fullname ||
+          !data?.username ||
+          !data?.email ||
+          !data?.password
+        ) {
+          return res
+            .status(400)
+            .json(resJSON(false, 400, "Please enter required fields", null));
+        }
+        // check if user is already registered
+        const userInfo = await User.findOne({
+          $or: [{ email: data?.email }, { username: data?.username }], // find user by email or username
+        }).lean(); // lean() => tăng hiệu suất truy vấn
+        if (userInfo) {
+          return res
+            .status(400)
+            .json(
+              resJSON(false, 400, "Email or username is already existed", null)
+            );
+        }
+        // register user
+        return enCryptPassword(data?.password).then(async (hash) => {
+          try {
+            const rs = await User.create({
+              fullname: data?.fullname,
+              username: data?.username,
+              password: hash,
+              email: data?.email,
+              active: true,
+              role: "customer",
+            });
+            return res
+              .status(200)
+              .json(resJSON(true, 200, "Register success", rs));
+          } catch (err) {
+            console.log("register user error: ", err);
+          }
+        });
+      } catch (error) {
+        console.log("register error: ", error);
       }
     },
   };

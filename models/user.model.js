@@ -11,7 +11,7 @@ const User = mongoose.Schema(
     phone: { type: String },
     email: { type: String, unique: true },
     active: { type: Boolean, default: false },
-    token: { type: String },
+    refresh_token: { type: String },
     role: { type: String },
   },
   { version: false, timestamps: true }
