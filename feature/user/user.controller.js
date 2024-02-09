@@ -2,7 +2,7 @@
 const ObjectID = require("mongodb").ObjectId;
 
 const resJSON = require("../../constants/responseJSON");
-const User = require("./user.model").User;
+const User = require("../../models/user.model").User;
 const Order = require("../../models/order").Order;
 
 function UserController() {
