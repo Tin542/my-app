@@ -1,10 +1,7 @@
-const { PrismaClient } = require("");
-
 const authMethod = require("./auth.method");
 const resJSON = require("../../constants/responseJSON");
 const roleConstants = require("../../constants/app/role/roleId");
-
-const prisma = new PrismaClient();
+const User = require("../../models/user.model").User;
 
 exports.isAdmin = async (req, res, next) => {
   // Lấy access token từ header
@@ -32,9 +29,7 @@ exports.isAdmin = async (req, res, next) => {
     return res.status(403).json(resJSON(false, 403, "Access Deniend", null));
   }
 
-  const user = await prisma.user.findUnique({
-    where: { user_id: verified.payload.uid },
-  });
+  const user = await User.findById(verified.payload.uid);
   req.user = user;
 
   return next();
@@ -65,9 +60,7 @@ exports.isCustomer = async (req, res, next) => {
     return res.status(403).json(resJSON(false, 403, "Access Deniend", null));
   }
 
-  const user = await prisma.user.findUnique({
-    where: { user_id: verified.payload.uid },
-  });
+  const user = await User.findById(verified.payload.uid);
   req.user = user;
 
   return next();
