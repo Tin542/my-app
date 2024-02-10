@@ -21,9 +21,9 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.use("/auth", authRouter);
-app.use('/products', productsRouter);
-app.use('/user', userRouter);
+app.use("/api/auth", authRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/user', userRouter);
 
 app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
