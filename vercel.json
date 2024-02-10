@@ -12,8 +12,8 @@
         "dest": "src/server.js"
       },
       {
-        "src": "/user/(.*)",
-        "dest": "src/server.js"
+        "src": "/(.*)",
+        "dest": "/"
       }
     ]
   }
