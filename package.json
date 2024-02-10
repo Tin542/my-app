@@ -4,7 +4,7 @@
   "description": "test-app",
   "main": "server.js",
   "engines": {
-    "node": "21.x"
+    "node": "18.x"
   },
   "scripts": {
     "start": "nodemon server",
