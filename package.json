@@ -7,9 +7,8 @@
     "node": "18.x"
   },
   "scripts": {
-    "start": "nodemon server",
-    "dev": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon --inspect sec/server.js"
   },
   "author": "tinnt",
   "license": "ISC",
