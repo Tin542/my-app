@@ -6,8 +6,12 @@ const authenMiddleware = require("../auth/auth.middleware");
 
 router.get("/get-all", productController.getAllProduct);
 router.get("/get-detail/:id", productController.getProductDetail);
-router.post("/create", productController.addProduct);
-router.post("/edit", productController.editProduct);
-router.delete("/delete/:id", productController.deleteProduct);
+router.post("/create", authenMiddleware.isAdmin, productController.addProduct);
+router.post("/edit", authenMiddleware.isAdmin, productController.editProduct);
+router.delete(
+  "/delete/:id",
+  authenMiddleware.isAdmin,
+  productController.deleteProduct
+);
 
 module.exports = router;

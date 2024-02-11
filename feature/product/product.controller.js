@@ -2,7 +2,7 @@
 const ObjectID = require("mongodb").ObjectId;
 
 const resJSON = require("../../constants/responseJSON");
-const Product = require("./product.model").Product;
+const Product = require("../../models/product").Product;
 const Category = require("../../models/category").category;
 
 function ProductController() {
