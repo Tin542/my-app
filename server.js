@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 app.use("/api/auth", authRouter);
-app.use('/api/products', productsRouter);
+app.use('/api/product', productsRouter);
 app.use('/api/user', userRouter);
 
 app.listen(port, () => {
