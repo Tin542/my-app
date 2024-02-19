@@ -93,7 +93,7 @@ function authController() {
             .json(resJSON(false, 404, "Account not found", null));
         }
         // check login
-        const result = bcrypt.compare(data?.password.trim(), user.password);
+        const result = await bcrypt.compare(data?.password.trim(), user.password);
         if (!result) {
           return res
             .status(400)
